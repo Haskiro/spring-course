@@ -1,11 +1,14 @@
 package com.github.haskiro.dao;
 
 import com.github.haskiro.models.Person;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -14,61 +17,41 @@ import java.util.Optional;
 
 @Component
 public class PersonDAO {
-    private final JdbcTemplate jdbcTemplate;
+
+    private SessionFactory sessionFactory;
 
     @Autowired
-    public PersonDAO(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public PersonDAO(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
     }
 
+    @Transactional(readOnly = true)
     public List<Person> index() {
-        return jdbcTemplate.query("SELECT * FROM person", new BeanPropertyRowMapper<>(Person.class));
+        Session session = sessionFactory.getCurrentSession();
+        List<Person> people = session.createSelectionQuery("Select p FROM Person p", Person.class).getResultList();
+        return people;
     }
 
     public Optional<Person> show(String email) {
-        return jdbcTemplate.query("SELECT * FROM person where email=?", new Object[]{email}, new BeanPropertyRowMapper<>(Person.class))
-                .stream().findAny();
+        return null;
     }
 
     public Person show(int id) {
-        //   sql запрос, по умолч использует preparedStatement,  массив с параметрам, row mapper
-        // row mapper - для мапа данных, пришедших с БД в качестве person
-        // row mapper - для мапа данных, пришедших с БД в качестве person
-        return jdbcTemplate.query("SELECT * FROM person where id=?", new Object[]{id} , new BeanPropertyRowMapper<>(Person.class))
-                .stream().findAny().orElse(null);
+        return null;
 
     }
 
     public void save(Person person) {
-        jdbcTemplate.update("INSERT INTO person(name, age, email, address) VALUES(?, ?, ?, ?)", person.getName(), person.getAge(), person.getEmail(), person.getAddress());
+
+
     }
 
     public void update(int id, Person updatedPerson) {
-        jdbcTemplate.update("UPDATE person SET name=?, age=?, email=?, address=? WHERE  id=?",
-                updatedPerson.getName(), updatedPerson.getAge(), updatedPerson.getEmail(), updatedPerson.getAddress(), id);
-//        try {
-//            PreparedStatement preparedStatement = connection.prepareStatement("UPDATE person SET name=?, age=?, email=? WHERE id=?;");
-//            preparedStatement.setString(1, updatedPerson.getName());
-//            preparedStatement.setInt(2, updatedPerson.getAge());
-//            preparedStatement.setString(3, updatedPerson.getEmail());
-//            preparedStatement.setInt(4, id);
-//
-//            preparedStatement.executeUpdate();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
+
     }
 
     public void delete(int id) {
-        jdbcTemplate.update("DELETE FROM person WHERE id=?", id);
-//        try {
-//            PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM person WHERE id=?;");
-//            preparedStatement.setInt(1, id);
-//
-//            preparedStatement.executeUpdate();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
+
 
     }
 
@@ -83,8 +66,8 @@ public class PersonDAO {
         long before = System.currentTimeMillis();
 
         for(Person person: people) {
-            jdbcTemplate.update("INSERT INTO person VALUES(?, ?, ?, ?)",
-                    person.getId(), person.getName(), person.getAge(), person.getEmail());
+//            jdbcTemplate.update("INSERT INTO person VALUES(?, ?, ?, ?)",
+//                    person.getId(), person.getName(), person.getAge(), person.getEmail());
         }
 
         long after = System.currentTimeMillis();
@@ -97,21 +80,21 @@ public class PersonDAO {
         long before = System.currentTimeMillis();
 
         // один запрос из 1000 вставок в бд, вместо 1000 запросов на вставку
-        jdbcTemplate.batchUpdate("INSERT INTO person VALUES (?, ?, ?, ?);",
-                new BatchPreparedStatementSetter() {
-                    @Override
-                    public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        ps.setInt(1, people.get(i).getId());
-                        ps.setString(2, people.get(i).getName());
-                        ps.setInt(3, people.get(i).getAge());
-                        ps.setString(4, people.get(i).getEmail());
-                    }
-
-                    @Override
-                    public int getBatchSize() {
-                        return people.size();
-                    }
-                });
+//        jdbcTemplate.batchUpdate("INSERT INTO person VALUES (?, ?, ?, ?);",
+//                new BatchPreparedStatementSetter() {
+//                    @Override
+//                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+//                        ps.setInt(1, people.get(i).getId());
+//                        ps.setString(2, people.get(i).getName());
+//                        ps.setInt(3, people.get(i).getAge());
+//                        ps.setString(4, people.get(i).getEmail());
+//                    }
+//
+//                    @Override
+//                    public int getBatchSize() {
+//                        return people.size();
+//                    }
+//                });
 
         long after = System.currentTimeMillis();
         System.out.println("Time: " + (after - before));
@@ -120,7 +103,7 @@ public class PersonDAO {
     private List<Person> createThousandPeople() {
         List<Person> people = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
-            people.add(new Person(i, "Name", 30, "test" + i + "@mail.ru", "some address"));
+            people.add(new Person("Name", 30, "test" + i + "@mail.ru", "some address"));
         }
 
         return people;
