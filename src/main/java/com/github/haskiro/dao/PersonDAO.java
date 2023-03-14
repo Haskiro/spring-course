@@ -1,8 +1,10 @@
 package com.github.haskiro.dao;
 
 import com.github.haskiro.models.Person;
+import jakarta.persistence.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.SelectionQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -32,27 +34,44 @@ public class PersonDAO {
         return people;
     }
 
+    @Transactional(readOnly = true)
     public Optional<Person> show(String email) {
-        return null;
+        Session session = sessionFactory.getCurrentSession();
+        SelectionQuery<Person> selectionQuery = session.createSelectionQuery("SELECT p FROM Person p WHERE p.email=:email", Person.class).setParameter("email", email);
+        return selectionQuery.getResultStream().findAny();
     }
 
+
+    @Transactional(readOnly = true)
     public Person show(int id) {
-        return null;
+        Session session = sessionFactory.getCurrentSession();
+
+        return session.get(Person.class, id);
 
     }
 
+    @Transactional
     public void save(Person person) {
-
-
+        Session session = sessionFactory.getCurrentSession();
+        session.persist(person);
     }
 
+    @Transactional
     public void update(int id, Person updatedPerson) {
+        Session session = sessionFactory.getCurrentSession();
+        Person personToBeUpdated = session.get(Person.class, id);
 
+        personToBeUpdated.setName(updatedPerson.getName());
+        personToBeUpdated.setAge(updatedPerson.getAge());
+        personToBeUpdated.setEmail(updatedPerson.getEmail());
+        personToBeUpdated.setAddress(updatedPerson.getAddress());
     }
 
+    @Transactional
     public void delete(int id) {
-
-
+        Session session = sessionFactory.getCurrentSession();
+        Person person = show(id);
+        session.remove(person);
     }
 
 
