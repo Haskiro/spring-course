@@ -3,6 +3,8 @@ package com.github.haskiro.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "person")
 public class Person {
@@ -28,6 +30,9 @@ public class Person {
     @Pattern(regexp = "[A-Z]\\w+, [A-Z]\\w+, \\d{6}", message = "Your address should in this format: Country, City, Postal Code (6 digits)")
     @Column(name = "address")
     private String address;
+
+    @OneToMany(mappedBy = "owner")
+    List<Item> items;
 
     public Person() {}
 
@@ -78,6 +83,13 @@ public class Person {
         this.email = email;
     }
 
+    public List<Item> getItems() {
+        return items;
+    }
+
+    public void setItems(List<Item> items) {
+        this.items = items;
+    }
 
     @Override
     public String toString() {

@@ -43,11 +43,15 @@ public class PeopleService {
     }
 
     public Optional<Person> findOneByEmail(String email) {
-        return peopleRepository.findByEmail(email);
+        return peopleRepository.findFirstByEmail(email);
     }
 
     @Transactional
     public void delete(int id) {
         peopleRepository.deleteById(id);
+    }
+
+    public void test() {
+        System.out.println("Testing here with debug. Inside Hibernate transaction");
     }
 }

@@ -1,6 +1,7 @@
 package com.github.haskiro.controllers;
 
 import com.github.haskiro.models.Person;
+import com.github.haskiro.services.ItemsService;
 import com.github.haskiro.services.PeopleService;
 import com.github.haskiro.util.PersonValidator;
 import jakarta.validation.Valid;
@@ -14,17 +15,25 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/people")
 public class PeopleController {
     private final PeopleService peopleService;
+    private final ItemsService itemsService;
     private final PersonValidator personValidator;
 
     @Autowired
-    public PeopleController(PeopleService peopleService, PersonValidator personValidator) {
+    public PeopleController(PeopleService peopleService, ItemsService itemsService, PersonValidator personValidator) {
         this.peopleService = peopleService;
+        this.itemsService = itemsService;
         this.personValidator = personValidator;
     }
 
     @GetMapping()
     public String index(Model model) {
         model.addAttribute("people", peopleService.findAll());
+
+        itemsService.findByItemName("Airpods");
+        itemsService.findByOwner(peopleService.findAll().get(1));
+
+        peopleService.test();
+
         return "people/index";
     }
 
