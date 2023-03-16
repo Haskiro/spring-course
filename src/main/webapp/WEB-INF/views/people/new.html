@@ -22,6 +22,10 @@
     <input type="text" th:field="*{address}" id="address" />
     <p th:if="${#fields.hasErrors('address')}" th:errors="*{address}" style="color: red">Address error</p>
     <br>
+    <label for="dateOfBirth">Enter date of birth (dd/mm/yyyy)</label>
+    <input type="date" th:field="*{dateOfBirth}" id="dateOfBirth" />
+    <p th:if="${#fields.hasErrors('dateOfBirth')}" th:errors="*{dateOfBirth}" style="color: red">Date of birth error</p>
+    <br>
   <input type="submit" value="Create Person" />
 </form>
 </body>

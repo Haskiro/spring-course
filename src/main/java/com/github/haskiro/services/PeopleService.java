@@ -1,5 +1,6 @@
 package com.github.haskiro.services;
 
+import com.github.haskiro.models.Mood;
 import com.github.haskiro.models.Person;
 import com.github.haskiro.repositories.PeopleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,6 +35,8 @@ public class PeopleService {
 
     @Transactional
     public void save(Person person) {
+        person.setCreatedAt(new Date());
+        person.setMood(Mood.CALM);
         peopleRepository.save(person);
     }
 

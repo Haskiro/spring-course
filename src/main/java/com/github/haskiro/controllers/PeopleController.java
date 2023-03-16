@@ -1,5 +1,6 @@
 package com.github.haskiro.controllers;
 
+import com.github.haskiro.dao.PersonDAO;
 import com.github.haskiro.models.Person;
 import com.github.haskiro.services.ItemsService;
 import com.github.haskiro.services.PeopleService;
@@ -18,21 +19,25 @@ public class PeopleController {
     private final ItemsService itemsService;
     private final PersonValidator personValidator;
 
+    private final PersonDAO personDAO;
     @Autowired
-    public PeopleController(PeopleService peopleService, ItemsService itemsService, PersonValidator personValidator) {
+    public PeopleController(PeopleService peopleService, ItemsService itemsService, PersonValidator personValidator, PersonDAO personDAO) {
         this.peopleService = peopleService;
         this.itemsService = itemsService;
         this.personValidator = personValidator;
+        this.personDAO = personDAO;
     }
 
     @GetMapping()
     public String index(Model model) {
         model.addAttribute("people", peopleService.findAll());
 
-        itemsService.findByItemName("Airpods");
-        itemsService.findByOwner(peopleService.findAll().get(1));
+//        itemsService.findByItemName("Airpods");
+//        itemsService.findByOwner(peopleService.findAll().get(1));
 
-        peopleService.test();
+//        peopleService.test();
+
+        personDAO.testNPlus1();
 
         return "people/index";
     }
